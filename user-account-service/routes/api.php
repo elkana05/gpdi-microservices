@@ -20,8 +20,12 @@ Route::prefix('user')->middleware('auth:api')->group(function () {
     Route::get('profile', [ProfileController::class, 'show']);
     Route::put('profile', [ProfileController::class, 'update']);
     
-    Route::apiResource('family-members', FamilyMemberController::class)->except(['show']);
+    Route::get('family-members', [FamilyMemberController::class, 'index']);
+    Route::post('family-members', [FamilyMemberController::class, 'store']);
+    Route::put('family-members/{id}', [FamilyMemberController::class, 'update']);
+    Route::delete('family-members/{id}', [FamilyMemberController::class, 'destroy']);
 });
 
+// Endpoint Internal (Diakses oleh service lain via Gateway)
 Route::get('users/{id}', [InternalController::class, 'showUser']);
 Route::get('roles', [InternalController::class, 'getRoles']);
