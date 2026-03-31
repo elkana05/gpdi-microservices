@@ -1,13 +1,17 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 
-Route::prefix('admin')->middleware('auth.jwt')->group(function () {
-    // Request Surat (Hanya read-only, mengembalikan link WA)
-    Route::get('letter-options', [AdminController::class, 'getLetterOptions']);
+Route::prefix('admin')->group(function () {
+    // Layanan Surat
+    Route::get('surat', [AdminController::class, 'getAllSurat']);
+    Route::post('surat', [AdminController::class, 'storeSurat']);
+    Route::put('surat/{id}', [AdminController::class, 'updateSurat']);
+    Route::delete('surat/{id}', [AdminController::class, 'deleteSurat']);
 
-    // Notifikasi
-    Route::get('notifications', [AdminController::class, 'getNotifications']);
-    Route::patch('notifications/{id}/read', [AdminController::class, 'markAsRead']);
+    // Notifikasi Sistem
+    Route::get('notifikasi', [AdminController::class, 'getAllNotifikasi']);
+    Route::post('notifikasi', [AdminController::class, 'storeNotifikasi']);
+    Route::put('notifikasi/{id}', [AdminController::class, 'updateNotifikasi']);
+    Route::delete('notifikasi/{id}', [AdminController::class, 'deleteNotifikasi']);
 });
