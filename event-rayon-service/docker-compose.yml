@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # 1. Container Aplikasi Laravel
+  event-rayon-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: event-rayon-app
+    restart: unless-stopped
+    ports:
+      - "8003:8003" # Membuka port 8003 ke laptop host Anda
+    depends_on:
+      - event-rayon-db # Memastikan DB jalan lebih dulu sebelum App
+    networks:
+      - event_rayon_network
+
+  # 2. Container Database PostgreSQL
+  event-rayon-db:
+    image: postgres:15-alpine # Menggunakan versi Alpine yang sangat ringan
+    container_name: event-rayon-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gpdi_event_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: rahasia # Sesuaikan dengan password di .env Anda
+    ports:
+      # Port kiri (5433) untuk diakses via PgAdmin di laptop Anda
+      # Port kanan (5432) adalah port asli postgres di dalam container
+      - "5433:5432" 
+    volumes:
+      - event_db_data:/var/lib/postgresql/data # Agar data tabel tidak hilang
+    networks:
+      - event_rayon_network
+
+# Membuat network internal khusus agar container app dan db bisa saling ping
+networks:
+  event_rayon_network:
+    driver: bridge
+
+# Mendefinisikan volume untuk penyimpanan data persistent
+volumes:
+  event_db_data:

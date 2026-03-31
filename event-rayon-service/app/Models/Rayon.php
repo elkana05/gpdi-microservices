@@ -9,6 +9,7 @@ class Rayon extends Model
 {
     use HasFactory;
 
+<<<<<<< Updated upstream
     protected $table = 'm_rayon';
 
     protected $fillable = [
@@ -16,4 +17,17 @@ class Rayon extends Model
         'id_ketua_rayon',
         'keterangan',
     ];
+=======
+    protected $fillable = [
+        'name',
+        'area',
+        'ketua_user_id'
+    ];
+
+    // Relasi 1-to-Many ke tabel rayon_schedules
+    public function rayonSchedules()
+    {
+        return $this->hasMany(RayonSchedule::class, 'rayon_id');
+    }
+>>>>>>> Stashed changes
 }
