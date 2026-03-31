@@ -23,12 +23,23 @@ class AuthController extends Controller
             ], 422);
         }
 
-        if (! $token = auth('api')->attempt($validator->validated())) {
+        // Cek kredensial
+        if (! auth('api')->attempt($validator->validated())) {
             return response()->json(['status' => 'error', 'message' => 'Unauthenticated'], 401);
         }
 
         $user = auth('api')->user();
         $role = $user->roles()->first();
+
+        // Buat Custom Claims untuk disisipkan ke dalam Token JWT
+        $customClaims = [
+            'name'     => $user->profile->full_name ?? null,
+            'role'     => $role->name ?? null,
+            'id_rayon' => $user->profile->rayon_id ?? null 
+        ];
+
+        // Cetak ulang token dengan membawa custom claims tersebut
+        $token = JWTAuth::claims($customClaims)->fromUser($user);
 
         return response()->json([
             'status' => 'success',
@@ -41,7 +52,8 @@ class AuthController extends Controller
                     'id' => $user->id,
                     'name' => $user->profile->full_name ?? null,
                     'email' => $user->email,
-                    'role' => $role->name ?? null
+                    'role' => $role->name ?? null,
+                    'id_rayon' => $user->profile->rayon_id ?? null
                 ]
             ]
         ], 200);
@@ -55,10 +67,20 @@ class AuthController extends Controller
 
     public function me()
     {
+        $user = auth('api')->user();
+        $role = $user->roles()->first();
+
+        // PERBAIKAN: Format data disamakan persis dengan format login
         return response()->json([
             'status' => 'success',
             'message' => 'Data retrieved successfully',
-            'data' => auth('api')->user()->load(['profile', 'roles']),
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->profile->full_name ?? null,
+                'email' => $user->email,
+                'role' => $role->name ?? null,
+                'id_rayon' => $user->profile->rayon_id ?? null
+            ],
             'meta' => null
         ], 200);
     }
