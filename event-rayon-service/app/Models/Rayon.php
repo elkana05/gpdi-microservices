@@ -9,15 +9,6 @@ class Rayon extends Model
 {
     use HasFactory;
 
-<<<<<<< Updated upstream
-    protected $table = 'm_rayon';
-
-    protected $fillable = [
-        'nama_rayon',
-        'id_ketua_rayon',
-        'keterangan',
-    ];
-=======
     protected $fillable = [
         'name',
         'area',
@@ -29,5 +20,4 @@ class Rayon extends Model
     {
         return $this->hasMany(RayonSchedule::class, 'rayon_id');
     }
->>>>>>> Stashed changes
 }
