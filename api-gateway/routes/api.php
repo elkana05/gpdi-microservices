@@ -36,3 +36,8 @@ Route::any('/event/{path}', function ($path) {
 Route::any('/admin/{path}', function ($path) {
     return app(GatewayController::class)->forwardRequest(request(), 'admin');
 })->where('path', '.*');
+
+// Tambahkan ini di API Gateway Anda
+Route::any('/content/{path}', function ($path) {
+    return app(\App\Http\Controllers\GatewayController::class)->forwardRequest(request(), 'content');
+})->where('path', '.*');
