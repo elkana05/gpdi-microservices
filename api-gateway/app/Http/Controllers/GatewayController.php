@@ -12,12 +12,12 @@ class GatewayController extends Controller
      */
     public function forwardRequest(Request $request, $service)
     {
-        // Peta URL layanan berdasarkan parameter
+        // Peta URL layanan berdasarkan parameter atau service map
         $services = [
-            'user'    => env('USER_SERVICE_URL', 'http://127.0.0.1:8001'),
-            'content' => env('CONTENT_SERVICE_URL', 'http://127.0.0.1:8002'),
-            'event'   => env('EVENT_SERVICE_URL', 'http://127.0.0.1:8003'),
-            'admin'   => env('ADMIN_SERVICE_URL', 'http://127.0.0.1:8004'),
+            'user'    => env('USER_SERVICE_URL', 'http://127.0.0.1:8001'), // user → service untuk manajemen pengguna (port 8001)
+            'content' => env('CONTENT_SERVICE_URL', 'http://127.0.0.1:8002'),  // content → service untuk manajemen konten (port 8002)
+            'event'   => env('EVENT_SERVICE_URL', 'http://127.0.0.1:8003'), // event → service untuk manajemen event (port 8003)
+            'admin'   => env('ADMIN_SERVICE_URL', 'http://127.0.0.1:8004'), // admin → service untuk manajemen admin (port 8004)
         ];
 
         if (!array_key_exists($service, $services)) {
