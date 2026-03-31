@@ -19,6 +19,8 @@ return new class extends Migration
             $table->time('start_time');
             $table->time('end_time')->nullable();
             $table->string('status_publish', 50)->default('published');
+            // KOLOM BARU UNTUK FOTO/GAMBAR
+            $table->string('gambar')->nullable(); 
             $table->timestamps();
         });
     }
