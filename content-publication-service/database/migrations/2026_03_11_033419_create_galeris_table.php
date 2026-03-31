@@ -9,12 +9,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('t_galeri', function (Blueprint $table) {
-            $table->id(); // BIGINT Auto Increment
+            $table->id(); 
             $table->string('judul', 255);
+            $table->string('kategori', 100)->default('Umum'); // TAMBAHAN KOLOM KATEGORI
             $table->text('deskripsi')->nullable();
-            $table->date('tanggal_kegiatan'); // Kronologis foto
-            $table->string('path_foto', 255); // URL/Path gambar
-            $table->uuid('id_pengunggah')->nullable(); // UUID tanpa FK constraint
+            $table->date('tanggal_kegiatan'); 
+            $table->string('path_foto', 255); 
+            $table->uuid('id_pengunggah')->nullable(); 
             $table->timestamps();
         });
     }
