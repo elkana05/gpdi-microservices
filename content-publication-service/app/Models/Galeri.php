@@ -10,14 +10,8 @@ class Galeri extends Model
     use HasFactory;
 
     protected $table = 't_galeri';
-
-    protected $fillable = [
-        'judul',
-        'deskripsi',
-        'tanggal_kegiatan',
-        'path_foto',
-        'id_pengunggah'
-    ];
+    // Tambahkan 'kategori' ke dalam array fillable
+    protected $fillable = ['judul', 'kategori', 'deskripsi', 'tanggal_kegiatan', 'path_foto', 'id_pengunggah'];
 
     protected function casts(): array
     {

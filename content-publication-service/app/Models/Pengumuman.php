@@ -9,18 +9,17 @@ class Pengumuman extends Model
 {
     use HasFactory;
 
-    // Mendefinisikan nama tabel secara eksplisit sesuai migration
+    // WAJIB: Beri tahu Laravel nama tabel yang benar
     protected $table = 't_pengumuman';
 
-    // Kolom-kolom yang diizinkan untuk diisi secara massal (mass assignment)
     protected $fillable = [
-        'judul',
-        'isi',
-        'lampiran',
-        'id_pembuat',
-        'scope',
-        'id_rayon',
-        'status',
+        'judul', 
+        'isi', 
+        'lampiran', 
+        'id_pembuat', 
+        'scope', 
+        'id_rayon', 
+        'status', 
         'published_at'
     ];
 

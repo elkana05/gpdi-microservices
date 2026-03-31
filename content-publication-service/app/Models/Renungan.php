@@ -11,12 +11,13 @@ class Renungan extends Model
 
     protected $table = 't_renungan';
 
+    // Di dalam class Model Anda
     protected $fillable = [
-        'tema',
-        'ayat_pokok',
-        'isi',
-        'id_penulis',
-        'status',
+        'tema', 
+        'ayat_pokok', 
+        'isi', 
+        'id_penulis', 
+        'status', 
         'published_at'
     ];
 
