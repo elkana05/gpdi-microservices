@@ -22,8 +22,10 @@ class FamilyMemberController extends Controller
         if (!$this->checkRole()) return response()->json(['status' => 'error', 'message' => 'You do not have permission to access this resource'], 403);
 
         $validator = Validator::make($request->all(), [
-            'full_name' => 'required|string', 'relationship' => 'required|string',
-            'gender' => 'required|string', 'birth_date' => 'required|date'
+            'full_name' => 'required|string', 
+            'relationship' => 'required|string',
+            'gender' => 'required|string', 
+            'birth_date' => 'required|date'
         ]);
 
         if ($validator->fails()) return response()->json(['status' => 'error', 'message' => 'Validation failed', 'errors' => $validator->errors()], 422);
@@ -39,7 +41,16 @@ class FamilyMemberController extends Controller
         $member = auth('api')->user()->familyMembers()->find($id);
         if (!$member) return response()->json(['status' => 'error', 'message' => 'Resource not found'], 404);
 
-        $member->update($request->all());
+        $validator = Validator::make($request->all(), [
+            'full_name' => 'sometimes|required|string', 
+            'relationship' => 'sometimes|required|string',
+            'gender' => 'sometimes|required|string', 
+            'birth_date' => 'sometimes|required|date'
+        ]);
+
+        if ($validator->fails()) return response()->json(['status' => 'error', 'message' => 'Validation failed', 'errors' => $validator->errors()], 422);
+
+        $member->update($validator->validated());
         return response()->json(['status' => 'success', 'message' => 'Family member updated successfully', 'data' => $member, 'meta' => null], 200);
     }
 

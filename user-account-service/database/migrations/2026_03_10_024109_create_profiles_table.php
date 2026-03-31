@@ -10,17 +10,19 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('profiles', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('full_name');
-            $table->string('phone_number')->nullable();
-            $table->text('address')->nullable();
-            $table->unsignedBigInteger('rayon_id')->nullable();
-            $table->timestamps();
-        });
-    }
+        {
+            Schema::create('profiles', function (Blueprint $table) {
+                $table->id();
+                $table->uuid('user_id');
+                $table->string('full_name', 255);
+                $table->string('phone_number', 50)->nullable();
+                $table->text('address')->nullable();
+                $table->bigInteger('rayon_id')->nullable(); // Tanpa FK constraint karena m_rayon ada di Event Service
+                $table->timestamps();
+
+                $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+            });
+        }
 
     /**
      * Reverse the migrations.
