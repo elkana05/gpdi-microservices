@@ -15,9 +15,10 @@ class JwtMiddleware
             $payload = JWTAuth::parseToken()->getPayload();
             $request->merge([
                 'auth_user' => [
-                    'id' => $payload->get('sub'),
-                    'name' => $payload->get('name') ?? 'User',
-                    'role' => $payload->get('role') ?? 'public',
+                    'id'       => $payload->get('sub'),
+                    'name'     => $payload->get('name') ?? 'User',
+                    'role'     => $payload->get('role') ?? 'public',
+                    'id_rayon' => $payload->get('id_rayon') // PERBAIKAN: Menangkap id_rayon dari Token
                 ]
             ]);
         } catch (Exception $e) {
