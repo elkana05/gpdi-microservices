@@ -38,11 +38,31 @@ class GatewayController extends Controller
         }
 
         try {
-            // Meneruskan request beserta payload (Query Params untuk GET, Body JSON untuk tipe lain)
+            // Meneruskan request beserta payload
             if ($method === 'GET') {
                 $response = Http::withHeaders($headers)->send($method, $url, ['query' => $request->query()]);
             } else {
-                $response = Http::withHeaders($headers)->send($method, $url, ['json' => $request->all()]);
+                // --- LOGIKA BARU: DETEKSI FILE (MULTIPART FORM DATA) ---
+                if (count($request->allFiles()) > 0) {
+                    $http = Http::withHeaders($headers);
+                    
+                    // 1. Lampirkan (Attach) semua file fisik yang diterima
+                    foreach ($request->allFiles() as $name => $file) {
+                        $http->attach(
+                            $name,
+                            file_get_contents($file->getPathname()),
+                            $file->getClientOriginalName()
+                        );
+                    }
+                    
+                    // 2. Teruskan beserta data teks lainnya (judul, deskripsi, dll)
+                    $dataTeks = $request->except(array_keys($request->allFiles()));
+                    $response = $http->post($url, $dataTeks);
+                    
+                } else {
+                    // --- LOGIKA LAMA: REQUEST BIASA (JSON) ---
+                    $response = Http::withHeaders($headers)->send($method, $url, ['json' => $request->all()]);
+                }
             }
 
             // Mengembalikan respons persis seperti yang diberikan oleh microservice
