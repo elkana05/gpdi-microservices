@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -16,11 +17,7 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
+            return response()->json(['status' => 'error', 'message' => 'Validation failed', 'errors' => $validator->errors()], 422);
         }
 
         // Cek kredensial
@@ -28,17 +25,22 @@ class AuthController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Unauthenticated'], 401);
         }
 
-        $user = auth('api')->user();
-        $role = $user->roles()->first();
+        // FIX: Gunakan Eager Loading 'with' agar hanya 1x query ke database
+        $user = User::with(['roles', 'profile'])->find(auth('api')->id());
 
-        // Buat Custom Claims untuk disisipkan ke dalam Token JWT
+        $role = $user->roles->first();
+        $roleName = $role->name ?? null;
+        $fullName = $user->profile->full_name ?? null;
+        $rayonId  = $user->profile->rayon_id ?? null;
+
+        // Buat Custom Claims
         $customClaims = [
-            'name'     => $user->profile->full_name ?? null,
-            'role'     => $role->name ?? null,
-            'id_rayon' => $user->profile->rayon_id ?? null 
+            'name'     => $fullName,
+            'role'     => $roleName,
+            'id_rayon' => $rayonId
         ];
 
-        // Cetak ulang token dengan membawa custom claims tersebut
+        // Generate token
         $token = JWTAuth::claims($customClaims)->fromUser($user);
 
         return response()->json([
@@ -50,10 +52,10 @@ class AuthController extends Controller
                 'expires_in' => auth('api')->factory()->getTTL() * 60,
                 'user' => [
                     'id' => $user->id,
-                    'name' => $user->profile->full_name ?? null,
+                    'name' => $fullName,
                     'email' => $user->email,
-                    'role' => $role->name ?? null,
-                    'id_rayon' => $user->profile->rayon_id ?? null
+                    'role' => $roleName,
+                    'id_rayon' => $rayonId
                 ]
             ]
         ], 200);
@@ -62,26 +64,22 @@ class AuthController extends Controller
     public function logout()
     {
         auth('api')->logout();
-        return response()->json(['status' => 'success', 'message' => 'Successfully logged out', 'data' => [], 'meta' => null], 200);
+        return response()->json(['status' => 'success', 'message' => 'Successfully logged out'], 200);
     }
 
     public function me()
     {
-        $user = auth('api')->user();
-        $role = $user->roles()->first();
+        $user = User::with(['roles', 'profile'])->find(auth('api')->id());
 
-        // PERBAIKAN: Format data disamakan persis dengan format login
         return response()->json([
             'status' => 'success',
-            'message' => 'Data retrieved successfully',
             'data' => [
                 'id' => $user->id,
                 'name' => $user->profile->full_name ?? null,
                 'email' => $user->email,
-                'role' => $role->name ?? null,
+                'role' => $user->roles->first()->name ?? null,
                 'id_rayon' => $user->profile->rayon_id ?? null
-            ],
-            'meta' => null
+            ]
         ], 200);
     }
 }

@@ -1,0 +1,32 @@
+[90m= [39m[34;4mApp\Models\Profile[39;24m {#6554
+    [34mfull_name[39m: "[32mAdmin Pusat GPdI[39m",
+    [34muser_id[39m: "[32m019dab20-e916-73d9-a889-f85f093a407b[39m",
+    [34mupdated_at[39m: "[32m2026-04-20 13:42:40[39m",
+    [34mcreated_at[39m: "[32m2026-04-20 13:42:40[39m",
+    [34mid[39m: [35m1[39m,
+  }
+
+[90m= [39m[34;4mApp\Models\Profile[39;24m {#6554
+    [34mfull_name[39m: "[32mAdmin Pusat GPdI[39m",
+    [34muser_id[39m: "[32m019dab30-6aa6-73e4-90cd-2ed20b59517c[39m",
+    [34mupdated_at[39m: "[32m2026-04-20 13:59:35[39m",
+    [34mcreated_at[39m: "[32m2026-04-20 13:59:35[39m",
+    [34mid[39m: [35m2[39m,
+  }
+
+[90m= [39m[34;4mApp\Models\Profile[39;24m {#6554
+    [34mfull_name[39m: "[32mAdmin Pusat GPdI[39m",
+    [34muser_id[39m: "[32m019dab31-a511-71aa-8085-350bd028a5ab[39m",
+    [34mupdated_at[39m: "[32m2026-04-20 14:00:59[39m",
+    [34mcreated_at[39m: "[32m2026-04-20 14:00:59[39m",
+    [34mid[39m: [35m3[39m,
+  }
+
+[90m= [39m[34;4mApp\Models\Profile[39;24m {#6554
+    [34mfull_name[39m: "[32mAdmin Pusat GPdI[39m",
+    [34muser_id[39m: "[32m019dab38-94dd-7215-b51c-a029e84889b4[39m",
+    [34mupdated_at[39m: "[32m2026-04-20 14:08:33[39m",
+    [34mcreated_at[39m: "[32m2026-04-20 14:08:33[39m",
+    [34mid[39m: [35m4[39m,
+  }
+

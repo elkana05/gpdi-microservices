@@ -12,7 +12,6 @@ class GatewayController extends Controller
      */
     public function forwardRequest(Request $request, $service)
     {
-        // Peta URL layanan berdasarkan parameter (Gunakan nama service Docker)
         $services = [
             'user'    => env('USER_SERVICE_URL', 'http://user-account-service:8001'),
             'content' => env('CONTENT_SERVICE_URL', 'http://content-publication-service:8002'),
@@ -21,64 +20,50 @@ class GatewayController extends Controller
         ];
 
         if (!array_key_exists($service, $services)) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Layanan tujuan tidak valid atau tidak dikonfigurasi.'
-            ], 500);
+            return response()->json(['status' => 'error', 'message' => 'Layanan tidak ditemukan.'], 500);
         }
 
         $baseUrl = rtrim($services[$service], '/');
-        $path = $request->path(); // Mengambil path seperti "api/auth/login"
+        $path = $request->path();
 
-        // PEMBENTUKAN URL YANG TEPAT SASARAN
-        // Karena microservice menggunakan Laravel api.php, rute mereka biasanya diawali /api/
-        // Kita pastikan URL yang ditembak adalah http://service:port/api/...
-        if (!str_starts_with($path, 'api/')) {
-            $url = $baseUrl . '/api/' . $path;
-        } else {
-            $url = $baseUrl . '/' . $path;
-        }
+        // Pastikan URL selalu mengarah ke /api/ di microservice tujuan
+        $apiUrl = str_replace('api/', '', $path);
+        $url = $baseUrl . '/api/' . ltrim($apiUrl, '/');
 
         $method = $request->method();
 
-        // Meneruskan Headers (khususnya Authorization Bearer Token)
-        $headers = ['Accept' => 'application/json'];
-        if ($request->hasHeader('Authorization')) {
-            $headers['Authorization'] = $request->header('Authorization');
+        // Ambil token Bearer dari request asli
+        $token = $request->bearerToken();
+
+        // Siapkan HTTP Client dengan timeout agar tidak lelet saat service mati
+        $http = Http::withHeaders(['Accept' => 'application/json'])->timeout(60);
+
+        if ($token) {
+            $http = $http->withToken($token);
         }
 
         try {
-            // Meneruskan request beserta payload
             if ($method === 'GET') {
-                $response = Http::withHeaders($headers)->send($method, $url, ['query' => $request->query()]);
+                $response = $http->get($url, $request->query());
             } else {
-                // DETEKSI FILE (MULTIPART FORM DATA)
-                if (count($request->allFiles()) > 0) {
-                    $http = Http::withHeaders($headers);
+                // Penanganan Multipart (jika ada file)
+                if ($request->allFiles()) {
                     foreach ($request->allFiles() as $name => $file) {
-                        $http->attach(
-                            $name,
-                            file_get_contents($file->getPathname()),
-                            $file->getClientOriginalName()
-                        );
+                        $http->attach($name, fopen($file->getRealPath(), 'r'), $file->getClientOriginalName());
                     }
-                    $dataTeks = $request->except(array_keys($request->allFiles()));
-                    $response = $http->post($url, $dataTeks);
+                    $response = $http->post($url, $request->except(array_keys($request->allFiles())));
                 } else {
-                    // REQUEST BIASA (JSON)
-                    $response = Http::withHeaders($headers)->send($method, $url, ['json' => $request->all()]);
+                    $response = $http->send($method, $url, ['json' => $request->all()]);
                 }
             }
 
-            // Mengembalikan respons persis seperti yang diberikan oleh microservice
             return response($response->body(), $response->status())
                 ->header('Content-Type', 'application/json');
 
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Layanan tujuan ('. strtoupper($service) .') tidak dapat dijangkau.',
-                'debug_url' => $url, // Tambahkan debug URL agar tahu mana yang ditembak
+                'message' => 'Gagal menghubungi service ' . strtoupper($service),
                 'error' => $e->getMessage()
             ], 503);
         }

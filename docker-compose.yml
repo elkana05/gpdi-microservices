@@ -1,59 +1,16 @@
 services:
-  # Database untuk setiap service (PostgreSQL)
-  db-gateway:
+  # SATU Database untuk semua service (Menghemat RAM)
+  db-shared:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: db_gateway
-      POSTGRES_USER: user_gateway
-      POSTGRES_PASSWORD: password_gateway
+      POSTGRES_USER: gpdi_user
+      POSTGRES_PASSWORD: gpdi_password
+      POSTGRES_DB: postgres
     networks:
       - gpdi-network
     volumes:
-      - pg-data-gateway:/var/lib/postgresql/data
-
-  db-admin:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: db_admin
-      POSTGRES_USER: user_admin
-      POSTGRES_PASSWORD: password_admin
-    networks:
-      - gpdi-network
-    volumes:
-      - pg-data-admin:/var/lib/postgresql/data
-
-  db-content:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: db_content
-      POSTGRES_USER: user_content
-      POSTGRES_PASSWORD: password_content
-    networks:
-      - gpdi-network
-    volumes:
-      - pg-data-content:/var/lib/postgresql/data
-
-  db-event:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: db_event
-      POSTGRES_USER: user_event
-      POSTGRES_PASSWORD: password_event
-    networks:
-      - gpdi-network
-    volumes:
-      - pg-data-event:/var/lib/postgresql/data
-
-  db-user:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: db_user
-      POSTGRES_USER: user_user
-      POSTGRES_PASSWORD: password_user
-    networks:
-      - gpdi-network
-    volumes:
-      - pg-data-user:/var/lib/postgresql/data
+      - pg-shared-data:/var/lib/postgresql/data
+      - ./docker-scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
 
   # Application Services
   api-gateway:
@@ -61,78 +18,84 @@ services:
       context: ./api-gateway
       dockerfile: Dockerfile
     volumes:
-      - ./api-gateway:/var/www
+      - ./api-gateway:/var/www:delegated
     ports:
       - "8000:8000"
-    command: php artisan serve --host=0.0.0.0 --port=8000
+    environment:
+      - PHP_CLI_SERVER_WORKERS=4
+    command: php artisan serve --host=0.0.0.0 --port=8000 --no-reload
     networks:
       - gpdi-network
     depends_on:
-      - db-gateway
+      - db-shared
 
   administration-utility-service:
     build:
       context: ./administration-utility-service
       dockerfile: Dockerfile
     volumes:
-      - ./administration-utility-service:/var/www
+      - ./administration-utility-service:/var/www:delegated
     ports:
       - "8004:8004"
-    command: php artisan serve --host=0.0.0.0 --port=8004
+    environment:
+      - PHP_CLI_SERVER_WORKERS=4
+    command: php artisan serve --host=0.0.0.0 --port=8004 --no-reload
     networks:
       - gpdi-network
     depends_on:
-      - db-admin
+      - db-shared
 
   content-publication-service:
     build:
       context: ./content-publication-service
       dockerfile: Dockerfile
     volumes:
-      - ./content-publication-service:/var/www
+      - ./content-publication-service:/var/www:delegated
     ports:
       - "8002:8002"
-    command: php artisan serve --host=0.0.0.0 --port=8002
+    environment:
+      - PHP_CLI_SERVER_WORKERS=4
+    command: php artisan serve --host=0.0.0.0 --port=8002 --no-reload
     networks:
       - gpdi-network
     depends_on:
-      - db-content
+      - db-shared
 
   event-rayon-service:
     build:
       context: ./event-rayon-service
       dockerfile: Dockerfile
     volumes:
-      - ./event-rayon-service:/var/www
+      - ./event-rayon-service:/var/www:delegated
     ports:
       - "8003:8003"
-    command: php artisan serve --host=0.0.0.0 --port=8003
+    environment:
+      - PHP_CLI_SERVER_WORKERS=4
+    command: php artisan serve --host=0.0.0.0 --port=8003 --no-reload
     networks:
       - gpdi-network
     depends_on:
-      - db-event
+      - db-shared
 
   user-account-service:
     build:
       context: ./user-account-service
       dockerfile: Dockerfile
     volumes:
-      - ./user-account-service:/var/www
+      - ./user-account-service:/var/www:delegated
     ports:
       - "8001:8001"
-    command: php artisan serve --host=0.0.0.0 --port=8001
+    environment:
+      - PHP_CLI_SERVER_WORKERS=4
+    command: php artisan serve --host=0.0.0.0 --port=8001 --no-reload
     networks:
       - gpdi-network
     depends_on:
-      - db-user
+      - db-shared
 
 networks:
   gpdi-network:
     driver: bridge
 
 volumes:
-  pg-data-gateway:
-  pg-data-admin:
-  pg-data-content:
-  pg-data-event:
-  pg-data-user:
+  pg-shared-data:

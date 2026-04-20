@@ -1,0 +1,11 @@
+**/public/storage
+**/vendor
+**/node_modules
+.git
+.idea
+.env
+api-gateway/storage/*.key
+**/storage/framework/cache/data/**
+**/storage/framework/sessions/**
+**/storage/framework/views/**
+**/storage/logs/**
