@@ -18,7 +18,8 @@ services:
       context: ./api-gateway
       dockerfile: Dockerfile
     volumes:
-      - ./api-gateway:/var/www:delegated
+      - ./api-gateway/storage:/var/www/storage
+      - ./api-gateway/bootstrap/cache:/var/www/bootstrap/cache
     ports:
       - "8000:8000"
     environment:
@@ -34,7 +35,8 @@ services:
       context: ./administration-utility-service
       dockerfile: Dockerfile
     volumes:
-      - ./administration-utility-service:/var/www:delegated
+      - ./administration-utility-service/storage:/var/www/storage
+      - ./administration-utility-service/bootstrap/cache:/var/www/bootstrap/cache
     ports:
       - "8004:8004"
     environment:
@@ -50,7 +52,8 @@ services:
       context: ./content-publication-service
       dockerfile: Dockerfile
     volumes:
-      - ./content-publication-service:/var/www:delegated
+      - ./content-publication-service/storage:/var/www/storage
+      - ./content-publication-service/bootstrap/cache:/var/www/bootstrap/cache
     ports:
       - "8002:8002"
     environment:
@@ -66,7 +69,8 @@ services:
       context: ./event-rayon-service
       dockerfile: Dockerfile
     volumes:
-      - ./event-rayon-service:/var/www:delegated
+      - ./event-rayon-service/storage:/var/www/storage
+      - ./event-rayon-service/bootstrap/cache:/var/www/bootstrap/cache
     ports:
       - "8003:8003"
     environment:
@@ -82,7 +86,8 @@ services:
       context: ./user-account-service
       dockerfile: Dockerfile
     volumes:
-      - ./user-account-service:/var/www:delegated
+      - ./user-account-service/storage:/var/www/storage
+      - ./user-account-service/bootstrap/cache:/var/www/bootstrap/cache
     ports:
       - "8001:8001"
     environment:
