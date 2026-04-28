@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Role;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -33,9 +34,34 @@ class UserController extends Controller
     // Fungsi khusus untuk mengubah role user (Menyinkronkan Pivot Table)
     public function updateUserRole(Request $request, $id)
     {
-        $request->validate([
-            'role' => 'required|string|exists:roles,name'
+        // Log request untuk debugging
+        Log::info('Update Role Request', [
+            'user_id' => $id,
+            'request_body' => $request->all(),
+            'content_type' => $request->header('Content-Type'),
+            'method' => $request->method()
         ]);
+
+        // Validasi input dengan custom messages
+        try {
+            $validated = $request->validate([
+                'role' => 'required|string|exists:roles,name'
+            ], [
+                'role.required' => 'Field role harus diisi',
+                'role.string' => 'Field role harus berupa string',
+                'role.exists' => 'Role "' . $request->role . '" tidak terdaftar. Gunakan: pendeta, jemaat_aktif, atau ketua_rayon'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Validation Error', [
+                'user_id' => $id,
+                'errors' => $e->errors()
+            ]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors()
+            ], 422);
+        }
 
         $user = User::find($id);
         if (!$user) {
@@ -43,15 +69,47 @@ class UserController extends Controller
         }
 
         // Cari ID dari nama role yang dikirim React (misal: 'ketua_rayon')
-        $role = Role::where('name', $request->role)->first();
+        $role = Role::where('name', $validated['role'])->first();
+        
+        // Pastikan role ditemukan
+        if (!$role) {
+            Log::error('Role not found', [
+                'requested_role' => $validated['role'],
+                'available_roles' => Role::pluck('name')->toArray()
+            ]);
+            return response()->json([
+                'status' => 'error', 
+                'message' => 'Role "' . $validated['role'] . '" tidak ditemukan dalam database'
+            ], 404);
+        }
 
-        // Keajaiban terjadi di sini: sync() akan otomatis menghapus role lama 
-        // di tabel user_roles dan menggantinya dengan role yang baru
-        $user->roles()->sync([$role->id]);
+        try {
+            // Keajaiban terjadi di sini: sync() akan otomatis menghapus role lama 
+            // di tabel user_roles dan menggantinya dengan role yang baru
+            $user->roles()->sync([$role->id]);
 
-        return response()->json([
-            'status' => 'success', 
-            'message' => 'Role berhasil diperbarui menjadi ' . $role->name
-        ]);
+            Log::info('Role updated successfully', [
+                'user_id' => $user->id,
+                'new_role' => $role->name
+            ]);
+
+            return response()->json([
+                'status' => 'success', 
+                'message' => 'Role berhasil diperbarui menjadi ' . $role->name,
+                'data' => [
+                    'user_id' => $user->id,
+                    'role' => $role->name
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Role update failed', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengupdate role: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
