@@ -6,9 +6,16 @@ use Illuminate\Support\Facades\Validator;
 
 class FamilyMemberController extends Controller
 {
+    /**
+     * PERBAIKAN: Mengizinkan role 'jemaat' atau 'ketua_rayon' untuk mengelola keluarga.
+     */
     private function checkRole() {
-        $role = auth('api')->user()->roles()->first();
-        return $role && $role->name === 'jemaat_aktif';
+        $user = auth('api')->user();
+        if (!$user) return false;
+
+        $role = $user->roles()->first();
+        // Sekarang kita izinkan 'jemaat' (nama baru) dan 'ketua_rayon'
+        return $role && in_array($role->name, ['jemaat', 'ketua_rayon', 'pendeta', 'admin']);
     }
 
     public function index()
@@ -19,49 +26,55 @@ class FamilyMemberController extends Controller
 
     public function store(Request $request)
     {
-        if (!$this->checkRole()) return response()->json(['status' => 'error', 'message' => 'You do not have permission to access this resource'], 403);
+        if (!$this->checkRole()) {
+            return response()->json(['status' => 'error', 'message' => 'Anda tidak memiliki izin untuk menambah anggota keluarga.'], 403);
+        }
 
         $validator = Validator::make($request->all(), [
-            'full_name' => 'required|string', 
+            'full_name' => 'required|string',
             'relationship' => 'required|string',
-            'gender' => 'required|string', 
+            'gender' => 'required|string',
             'birth_date' => 'required|date'
         ]);
 
-        if ($validator->fails()) return response()->json(['status' => 'error', 'message' => 'Validation failed', 'errors' => $validator->errors()], 422);
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'message' => 'Validasi gagal', 'errors' => $validator->errors()], 422);
+        }
 
         $member = auth('api')->user()->familyMembers()->create($validator->validated());
-        return response()->json(['status' => 'success', 'message' => 'Family member added successfully', 'data' => $member, 'meta' => null], 201);
+        return response()->json(['status' => 'success', 'message' => 'Anggota keluarga berhasil ditambahkan', 'data' => $member, 'meta' => null], 201);
     }
 
     public function update(Request $request, $id)
     {
-        if (!$this->checkRole()) return response()->json(['status' => 'error', 'message' => 'You do not have permission to access this resource'], 403);
-        
+        if (!$this->checkRole()) {
+            return response()->json(['status' => 'error', 'message' => 'Izin ditolak'], 403);
+        }
+
         $member = auth('api')->user()->familyMembers()->find($id);
-        if (!$member) return response()->json(['status' => 'error', 'message' => 'Resource not found'], 404);
+        if (!$member) return response()->json(['status' => 'error', 'message' => 'Data tidak ditemukan'], 404);
 
         $validator = Validator::make($request->all(), [
-            'full_name' => 'sometimes|required|string', 
+            'full_name' => 'sometimes|required|string',
             'relationship' => 'sometimes|required|string',
-            'gender' => 'sometimes|required|string', 
+            'gender' => 'sometimes|required|string',
             'birth_date' => 'sometimes|required|date'
         ]);
 
-        if ($validator->fails()) return response()->json(['status' => 'error', 'message' => 'Validation failed', 'errors' => $validator->errors()], 422);
+        if ($validator->fails()) return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
 
         $member->update($validator->validated());
-        return response()->json(['status' => 'success', 'message' => 'Family member updated successfully', 'data' => $member, 'meta' => null], 200);
+        return response()->json(['status' => 'success', 'message' => 'Data berhasil diubah', 'data' => $member, 'meta' => null], 200);
     }
 
     public function destroy($id)
     {
-        if (!$this->checkRole()) return response()->json(['status' => 'error', 'message' => 'You do not have permission to access this resource'], 403);
+        if (!$this->checkRole()) return response()->json(['status' => 'error', 'message' => 'Izin ditolak'], 403);
 
         $member = auth('api')->user()->familyMembers()->find($id);
-        if (!$member) return response()->json(['status' => 'error', 'message' => 'Resource not found'], 404);
+        if (!$member) return response()->json(['status' => 'error', 'message' => 'Data tidak ditemukan'], 404);
 
         $member->delete();
-        return response()->json(['status' => 'success', 'message' => 'Family member deleted successfully', 'data' => (object)[], 'meta' => null], 200);
+        return response()->json(['status' => 'success', 'message' => 'Data berhasil dihapus'], 200);
     }
 }

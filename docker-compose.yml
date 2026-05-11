@@ -1,5 +1,4 @@
 services:
-  # SATU Database untuk semua service (Menghemat RAM)
   db-shared:
     image: postgres:15-alpine
     environment:
@@ -12,14 +11,14 @@ services:
       - pg-shared-data:/var/lib/postgresql/data
       - ./docker-scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
 
-  # Application Services
   api-gateway:
     build:
       context: ./api-gateway
       dockerfile: Dockerfile
     volumes:
-      - ./api-gateway/storage:/var/www/storage
-      - ./api-gateway/bootstrap/cache:/var/www/bootstrap/cache
+      - ./api-gateway:/var/www
+      - /var/www/vendor # Anonymous volume: folder vendor tetap di internal Docker agar CEPAT
+      - /var/www/node_modules # Jika ada node_modules, ini juga biar tidak lelet
     ports:
       - "8000:8000"
     environment:
@@ -35,8 +34,8 @@ services:
       context: ./administration-utility-service
       dockerfile: Dockerfile
     volumes:
-      - ./administration-utility-service/storage:/var/www/storage
-      - ./administration-utility-service/bootstrap/cache:/var/www/bootstrap/cache
+      - ./administration-utility-service:/var/www
+      - /var/www/vendor
     ports:
       - "8004:8004"
     environment:
@@ -52,8 +51,8 @@ services:
       context: ./content-publication-service
       dockerfile: Dockerfile
     volumes:
-      - ./content-publication-service/storage:/var/www/storage
-      - ./content-publication-service/bootstrap/cache:/var/www/bootstrap/cache
+      - ./content-publication-service:/var/www
+      - /var/www/vendor
     ports:
       - "8002:8002"
     environment:
@@ -69,8 +68,8 @@ services:
       context: ./event-rayon-service
       dockerfile: Dockerfile
     volumes:
-      - ./event-rayon-service/storage:/var/www/storage
-      - ./event-rayon-service/bootstrap/cache:/var/www/bootstrap/cache
+      - ./event-rayon-service:/var/www
+      - /var/www/vendor
     ports:
       - "8003:8003"
     environment:
@@ -86,8 +85,8 @@ services:
       context: ./user-account-service
       dockerfile: Dockerfile
     volumes:
-      - ./user-account-service/storage:/var/www/storage
-      - ./user-account-service/bootstrap/cache:/var/www/bootstrap/cache
+      - ./user-account-service:/var/www
+      - /var/www/vendor
     ports:
       - "8001:8001"
     environment:

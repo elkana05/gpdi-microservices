@@ -13,40 +13,34 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Buat Data Role Sesuai Blueprint
-        $roles = ['pendeta', 'jemaat_aktif', 'ketua_rayon'];
+        // 1. Buat Data Role (Disinkronkan dengan Frontend)
+        $roles = ['admin', 'pendeta', 'jemaat', 'ketua_rayon'];
         foreach ($roles as $roleName) {
             Role::firstOrCreate(['name' => $roleName]);
         }
 
-        // 2. Buat User Dummy: JEMAAT AKTIF (Bisa mengelola Family Members)
-        $jemaat = User::create([
-            'id' => Str::uuid(),
-            'email' => 'jemaat@gpdi.com',
-            'password' => Hash::make('password123'),
-            'is_active' => true,
-        ]);
-        $jemaat->roles()->attach(Role::where('name', 'jemaat_aktif')->first()->id);
-        
-        Profile::create([
-            'user_id' => $jemaat->id,
-            'full_name' => 'Bapak Jemaat Test',
-            'phone_number' => '081234567890',
-            'address' => 'Jl. Gereja No. 1',
-        ]);
+        // 2. Buat Akun Admin Utama
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@gpdi.com'],
+            [
+                'id' => Str::uuid(),
+                'password' => Hash::make('password123'),
+                'is_active' => true,
+            ]
+        );
+        $admin->roles()->sync([Role::where('name', 'admin')->first()->id]);
+        Profile::updateOrCreate(['user_id' => $admin->id], ['full_name' => 'Administrator Utama']);
 
-        // 3. Buat User Dummy: PENDETA (Akses umum tinggi)
-        $pendeta = User::create([
-            'id' => Str::uuid(),
-            'email' => 'pendeta@gpdi.com',
-            'password' => Hash::make('password123'),
-            'is_active' => true,
-        ]);
-        $pendeta->roles()->attach(Role::where('name', 'pendeta')->first()->id);
-        
-        Profile::create([
-            'user_id' => $pendeta->id,
-            'full_name' => 'Pdt. Samuel',
-        ]);
+        // 3. Buat User Dummy: PENDETA
+        $pendeta = User::firstOrCreate(
+            ['email' => 'pendeta@gpdi.com'],
+            [
+                'id' => Str::uuid(),
+                'password' => Hash::make('password123'),
+                'is_active' => true,
+            ]
+        );
+        $pendeta->roles()->sync([Role::where('name', 'pendeta')->first()->id]);
+        Profile::updateOrCreate(['user_id' => $pendeta->id], ['full_name' => 'Pdt. Samuel']);
     }
 }
