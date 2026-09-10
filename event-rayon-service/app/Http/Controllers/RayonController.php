@@ -19,12 +19,12 @@ class RayonController extends Controller
         ], 200);
     }
 
-    // 2. Membuat Rayon baru (Otoritas: Hanya Pendeta)
+    // 2. Membuat Rayon baru (Otoritas: Pendeta atau Admin)
     public function store(Request $request)
     {
         $user = $request->auth_user;
-        if ($user['role'] !== 'pendeta') {
-            return response()->json(['status' => 'error', 'message' => 'Akses ditolak. Hanya Pendeta yang dapat membuat Rayon.'], 403);
+        if (!in_array($user['role'], ['pendeta', 'admin'])) {
+            return response()->json(['status' => 'error', 'message' => 'Akses ditolak. Hanya Pendeta atau Admin yang dapat membuat Rayon.'], 403);
         }
 
         $validator = Validator::make($request->all(), [
@@ -57,11 +57,11 @@ class RayonController extends Controller
         ], 200);
     }
 
-    // 4. Mengupdate data Rayon (Otoritas: Hanya Pendeta)
+    // 4. Mengupdate data Rayon (Otoritas: Pendeta atau Admin)
     public function update(Request $request, $id)
     {
         $user = $request->auth_user;
-        if ($user['role'] !== 'pendeta') return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
+        if (!in_array($user['role'], ['pendeta', 'admin'])) return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
 
         $rayon = Rayon::find($id);
         if (!$rayon) return response()->json(['status' => 'error', 'message' => 'Rayon tidak ditemukan'], 404);
@@ -89,7 +89,7 @@ class RayonController extends Controller
         $rayon = Rayon::find($id);
         if (!$rayon) return response()->json(['status' => 'error', 'message' => 'Rayon tidak ditemukan'], 404);
 
-        if ($user['role'] !== 'pendeta' && ($user['role'] !== 'ketua_rayon' || $rayon->id_ketua_rayon !== $user['id'])) {
+        if (!in_array($user['role'], ['pendeta', 'admin']) && ($user['role'] !== 'ketua_rayon' || $rayon->id_ketua_rayon !== $user['id'])) {
             return response()->json(['status' => 'error', 'message' => 'Akses ditolak. Anda tidak berwenang mengelola rayon ini.'], 403);
         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\ProfilGereja;
 use App\Models\Pelayanan;
 use App\Models\Galeri;
@@ -55,12 +56,15 @@ class PublicController extends Controller
         ], 200);
     }
 
+    /**
+     * Pengumuman publik — untuk halaman yang bisa diakses tanpa login.
+     * Hanya menampilkan pengumuman berstatus 'Aktif' dengan scope 'publik'.
+     */
     public function announcements()
     {
-        // Publik hanya melihat pengumuman yang di-set public dan published
-        $pengumuman = Pengumuman::where('scope', 'public')
-            ->where('status', 'published')
-            ->orderBy('published_at', 'desc')
+        $pengumuman = Pengumuman::where('scope', 'publik')
+            ->where('status', 'Aktif')
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return response()->json([
@@ -69,10 +73,57 @@ class PublicController extends Controller
         ], 200);
     }
 
+    /**
+     * Pengumuman untuk jemaat (anggota yang sudah login).
+     * Menampilkan pengumuman berstatus 'Aktif' dengan scope 'publik' ATAU 'jemaat'.
+     * Pengumuman scope 'rayon' TIDAK ditampilkan di sini (ada halaman terpisah).
+     */
+    public function getJemaatPengumuman()
+    {
+        $pengumuman = Pengumuman::whereIn('scope', ['publik', 'jemaat'])
+            ->where('status', 'Aktif')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => 'success', 'message' => 'Jemaat announcements retrieved',
+            'data' => $pengumuman, 'meta' => null
+        ], 200);
+    }
+
+    /**
+     * Pengumuman khusus Rayon — hanya untuk anggota rayon yang bersangkutan.
+     * Membaca id_rayon dari JWT claims yang sudah di-inject oleh JwtMiddleware.
+     */
+    public function getRayonPengumuman(Request $request)
+    {
+        $authUser = $request->input('auth_user');
+        $idRayon  = $authUser['id_rayon'] ?? null;
+
+        if (!$idRayon) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Anda belum terdaftar di Rayon mana pun.',
+                'data'    => []
+            ], 200); // 200 agar FE tidak error, data kosong saja
+        }
+
+        $pengumuman = Pengumuman::where('scope', 'rayon')
+            ->where('id_rayon', $idRayon)
+            ->where('status', 'Aktif')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => 'success', 'message' => 'Rayon announcements retrieved',
+            'data'   => $pengumuman, 'meta' => null
+        ], 200);
+    }
+
     public function showAnnouncement($id)
     {
-        $pengumuman = Pengumuman::where('scope', 'public')
-            ->where('status', 'published')
+        $pengumuman = Pengumuman::where('scope', 'publik')
+            ->where('status', 'Aktif')
             ->find($id);
 
         if (!$pengumuman) {

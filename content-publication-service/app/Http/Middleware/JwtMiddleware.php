@@ -21,10 +21,10 @@ class JwtMiddleware
             // Menyisipkan data pengguna dari klaim JWT ke dalam request agar bisa dipakai di Controller
             $request->merge([
                 'auth_user' => [
-                    'id' => $payload->get('sub'),
-                    // Jika Anda menambahkan custom claims 'name' dan 'role' di User Service:
-                    'name' => $payload->get('name') ?? 'User',
-                    'role' => $payload->get('role') ?? 'public',
+                    'id'       => $payload->get('sub'),
+                    'name'     => $payload->get('name') ?? 'User',
+                    'role'     => $payload->get('role') ?? 'public',
+                    'id_rayon' => $payload->get('id_rayon') ?? null,
                 ]
             ]);
 

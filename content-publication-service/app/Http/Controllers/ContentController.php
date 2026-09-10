@@ -22,10 +22,10 @@ class ContentController extends Controller
     public function storePengumuman(Request $request)
     {
         $request->validate([
-            'judul' => 'required|string|max:255',
-            'isi' => 'required|string',
+            'judul'  => 'required|string|max:255',
+            'isi'    => 'required|string',
             'status' => 'required|string',
-            'scope' => 'required|string'
+            'scope'  => 'required|in:publik,jemaat,rayon'
         ]);
 
         $pengumuman = Pengumuman::create($request->all());

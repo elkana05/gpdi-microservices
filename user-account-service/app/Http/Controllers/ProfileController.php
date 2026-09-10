@@ -36,8 +36,16 @@ class ProfileController extends Controller
 
     public function show()
     {
-        $profile = auth('api')->user()->profile;
-        return response()->json(['status' => 'success', 'data' => $profile ?? (object)[]], 200);
+        $user    = auth('api')->user();
+        $profile = $user->profile;
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => array_merge(
+                $profile ? $profile->toArray() : [],
+                ['email' => $user->email]   // tambahkan email dari tabel users
+            )
+        ], 200);
     }
 
     public function update(Request $request)
@@ -60,6 +68,13 @@ class ProfileController extends Controller
 
     public function getAllJemaat()
     {
+        // Hanya admin atau pendeta yang boleh melihat semua data user
+        $currentUser = auth('api')->user();
+        $role = $currentUser?->roles()->first()?->name;
+        if (!in_array($role, ['admin', 'pendeta'])) {
+            return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
+        }
+
         $users = User::with(['profile', 'roles'])->orderBy('created_at', 'desc')->get();
         $formatted = $users->map(function($user) {
             return [

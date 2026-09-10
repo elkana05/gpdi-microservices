@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ContentController;
+use App\Http\Controllers\PublicController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +27,15 @@ Route::prefix('content')->group(function () {
     // Rute Publik untuk menampilkan foto di halaman GaleriKegiatanPage.jsx
     Route::get('galeri', [ContentController::class, 'getPublicGaleri']);
 
+    // Rute Publik untuk Pengumuman (tanpa login) — hanya scope 'publik' & status 'Aktif'
+    Route::get('pengumuman', [PublicController::class, 'announcements']);
+
+    // Rute Pengumuman untuk Jemaat yang sudah login — scope 'publik' + 'jemaat' & status 'Aktif'
+    // Juga: Pengumuman khusus Rayon — filter berdasarkan id_rayon user yang login
+    Route::middleware(['auth.jwt'])->group(function () {
+        Route::get('jemaat/pengumuman', [PublicController::class, 'getJemaatPengumuman']);
+        Route::get('rayon/pengumuman', [PublicController::class, 'getRayonPengumuman']);
+    });
 
     // ---------------------------------------------------------
     // 2. RUTE KHUSUS ADMIN / PENDETA (CRUD)

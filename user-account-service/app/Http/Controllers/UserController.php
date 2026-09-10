@@ -35,10 +35,10 @@ class UserController extends Controller
     public function updateUserRole(Request $request, $id)
     {
         $currentUser = auth('api')->user();
-        if (!$currentUser || !$currentUser->roles()->where('name', 'admin')->exists()) {
+        if (!$currentUser || !$currentUser->roles()->whereIn('name', ['admin', 'pendeta'])->exists()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Akses ditolak. Hanya admin yang dapat mengubah role.'
+                'message' => 'Akses ditolak. Hanya admin atau pendeta yang dapat mengubah role.'
             ], 403);
         }
 
