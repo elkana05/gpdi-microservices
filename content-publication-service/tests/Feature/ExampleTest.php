@@ -2,17 +2,16 @@
 
 namespace Tests\Feature;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
-    /**
-     * A basic test example.
-     */
-    public function test_the_application_returns_a_successful_response(): void
+    use RefreshDatabase;
+
+    public function test_the_public_gallery_endpoint_returns_a_successful_response(): void
     {
-        $response = $this->get('/');
+        $response = $this->getJson('/api/content/galeri');
 
         $response->assertStatus(200);
     }

@@ -34,6 +34,18 @@ class UserController extends Controller
     // Fungsi khusus untuk mengubah role user (Menyinkronkan Pivot Table)
     public function updateUserRole(Request $request, $id)
     {
+        $currentUser = auth('api')->user();
+        if (!$currentUser || !$currentUser->roles()->where('name', 'admin')->exists()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Akses ditolak. Hanya admin yang dapat mengubah role.'
+            ], 403);
+        }
+
+        if ($request->input('role') === 'jemaat_aktif') {
+            $request->merge(['role' => 'jemaat']);
+        }
+
         // Log request untuk debugging
         Log::info('Update Role Request', [
             'user_id' => $id,
@@ -49,7 +61,7 @@ class UserController extends Controller
             ], [
                 'role.required' => 'Field role harus diisi',
                 'role.string' => 'Field role harus berupa string',
-                'role.exists' => 'Role "' . $request->role . '" tidak terdaftar. Gunakan: pendeta, jemaat_aktif, atau ketua_rayon'
+                'role.exists' => 'Role "' . $request->role . '" tidak terdaftar. Gunakan: pendeta, jemaat, atau ketua_rayon'
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::warning('Validation Error', [

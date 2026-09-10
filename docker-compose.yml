@@ -9,7 +9,7 @@ services:
       - gpdi-network
     volumes:
       - pg-shared-data:/var/lib/postgresql/data
-      - ./docker-scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+      - ./docker-scripts:/docker-entrypoint-initdb.d:ro
 
   api-gateway:
     build:

@@ -30,7 +30,7 @@ Route::prefix('content')->group(function () {
     // ---------------------------------------------------------
     // 2. RUTE KHUSUS ADMIN / PENDETA (CRUD)
     // ---------------------------------------------------------
-    Route::prefix('admin')->group(function () {
+    Route::prefix('admin')->middleware(['auth.jwt', 'role:admin,pendeta'])->group(function () {
         
         // --- CRUD Pengumuman ---
         Route::get('pengumuman', [ContentController::class, 'getAllPengumuman']);

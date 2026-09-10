@@ -76,28 +76,29 @@ class ProfileController extends Controller
 
     public function storeJemaat(Request $request)
     {
-        // 1. Tambahkan validasi 'role'
+        // Keep the frontend role name compatible with the persisted database role.
+        if ($request->input('role') === 'jemaat_aktif') {
+            $request->merge(['role' => 'jemaat']);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
-            'role' => 'required|string|exists:roles,name', // Pastikan role dikirim dan ada di DB
+            'role' => 'required|string|exists:roles,name',
             'id_rayon' => 'nullable|integer'
         ]);
 
         DB::beginTransaction();
         try {
-            // 2. Simpan ke tabel users
             $user = User::create([
                 'email' => $request->email,
                 'password' => bcrypt($request->password),
             ]);
 
-            // 3. PASANG ROLE (Ini yang sebelumnya terlewat)
             $role = Role::where('name', $request->role)->first();
             $user->roles()->attach($role->id);
 
-            // 4. Simpan ke tabel profiles
             DB::table('profiles')->insert([
                 'user_id' => $user->id,
                 'full_name' => $request->name,

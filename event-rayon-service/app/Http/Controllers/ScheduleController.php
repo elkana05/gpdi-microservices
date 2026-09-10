@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\WorshipSchedule;
 use App\Models\ActivitySchedule;
 use App\Models\RayonSchedule;
+use App\Models\Rayon;
 
 class ScheduleController extends Controller
 {
@@ -138,6 +139,14 @@ class ScheduleController extends Controller
             ], 400);
         }
 
+        $rayon = Rayon::find($rayonId);
+        if (!$rayon) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Rayon untuk akun Anda tidak ditemukan.'
+            ], 404);
+        }
+
         // Mengambil semua jadwal untuk rayon milik Ketua Rayon yang sedang login
         $schedules = RayonSchedule::where('rayon_id', $rayonId)
             ->orderBy('event_date', 'desc')
@@ -145,7 +154,8 @@ class ScheduleController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $schedules
+            'data' => $schedules,
+            'rayon' => $rayon
         ], 200);
     }
 

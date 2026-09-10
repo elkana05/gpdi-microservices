@@ -32,7 +32,7 @@ Route::prefix('event')->group(function () {
     // RUTE KHUSUS KETUA RAYON (Manajemen Ibadah Rayon)
     // ---------------------------------------------------------
     // PERBAIKAN BARU: Rute ini dipanggil oleh ManajemenIbadahPage.jsx
-    Route::middleware(JwtMiddleware::class)->group(function () {
+    Route::middleware([JwtMiddleware::class, 'role:admin,pendeta,ketua_rayon'])->group(function () {
         Route::get('rayon-schedules/me', [ScheduleController::class, 'getJadwalByKetuaRayon']);
         Route::post('rayon-schedules', [ScheduleController::class, 'storeRayonSchedule']);
         Route::put('rayon-schedules/{id}', [ScheduleController::class, 'updateRayonSchedule']);
@@ -43,7 +43,7 @@ Route::prefix('event')->group(function () {
     // RUTE ADMIN (Digunakan oleh Dasbor Pendeta / Admin / Ketua Rayon)
     // ---------------------------------------------------------
     // PERBAIKAN 3: Bungkus dengan JwtMiddleware
-    Route::prefix('admin')->middleware(JwtMiddleware::class)->group(function () {
+    Route::prefix('admin')->middleware([JwtMiddleware::class, 'role:admin,pendeta'])->group(function () {
         
         // --- Manajemen Rayon ---
         Route::get('rayon', [EventController::class, 'getAllRayon']);

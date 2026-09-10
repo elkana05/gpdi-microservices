@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\PilihanSurat;
-use App\Models\Notifikasi;
 
 class AdminController extends Controller
 {
@@ -40,37 +39,6 @@ class AdminController extends Controller
 
     public function deleteSurat($id) {
         PilihanSurat::destroy($id);
-        return response()->json(['status' => 'success']);
-    }
-
-    // ==========================================
-    // MODULE: NOTIFIKASI SISTEM
-    // ==========================================
-    public function getAllNotifikasi() {
-        return response()->json(['status' => 'success', 'data' => Notifikasi::orderBy('created_at', 'desc')->get()]);
-    }
-
-    public function storeNotifikasi(Request $request) {
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'isi' => 'required|string',
-            'id_pengguna' => 'nullable|uuid', // Nullable jika notifikasi broadcast ke semua orang
-        ]);
-        
-        $notifikasi = Notifikasi::create($request->all());
-        return response()->json(['status' => 'success', 'data' => $notifikasi], 201);
-    }
-
-    public function updateNotifikasi(Request $request, $id) {
-        $notifikasi = Notifikasi::find($id);
-        if (!$notifikasi) return response()->json(['status' => 'error', 'message' => 'Data tidak ditemukan'], 404);
-        
-        $notifikasi->update($request->all());
-        return response()->json(['status' => 'success', 'data' => $notifikasi]);
-    }
-
-    public function deleteNotifikasi($id) {
-        Notifikasi::destroy($id);
         return response()->json(['status' => 'success']);
     }
 }

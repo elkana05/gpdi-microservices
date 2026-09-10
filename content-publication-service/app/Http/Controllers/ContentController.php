@@ -7,8 +7,6 @@ use Illuminate\Http\Request;
 use App\Models\Pengumuman;
 use App\Models\Renungan;
 use App\Models\Galeri;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class ContentController extends Controller
 {
@@ -31,23 +29,6 @@ class ContentController extends Controller
         ]);
 
         $pengumuman = Pengumuman::create($request->all());
-
-        // FIX: Gunakan nama service docker dan tambahkan timeout
-        try {
-            $judulNotif = ($request->scope === 'rayon') ? 'Pengumuman Baru Rayon' : 'Pengumuman Baru Gereja';
-
-            // Gunakan URL Internal Docker
-            Http::timeout(3)->post('http://administration-utility-service:8004/api/admin/notifikasi', [
-                'judul' => $judulNotif,
-                'isi' => 'Terdapat pengumuman baru: ' . $pengumuman->judul,
-                'id_pengguna' => null,
-                'jenis_referensi' => 'Pengumuman',
-                'id_referensi' => $pengumuman->id
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Notifikasi Gagal: ' . $e->getMessage());
-        }
 
         return response()->json(['status' => 'success', 'data' => $pengumuman], 201);
     }
