@@ -1,0 +1,8 @@
+# IDE & Editor folders
+.idea/
+.qodo/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
