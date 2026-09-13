@@ -4,6 +4,7 @@
 .git
 .idea
 .env
+# .env.production dibiarkan bisa masuk image (digunakan sebagai referensi di VPS)
 api-gateway/storage/*.key
 **/storage/framework/cache/data/**
 **/storage/framework/sessions/**

@@ -10,6 +10,12 @@ services:
     volumes:
       - pg-shared-data:/var/lib/postgresql/data
       - ./docker-scripts:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gpdi_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   api-gateway:
     build:
@@ -27,7 +33,8 @@ services:
     networks:
       - gpdi-network
     depends_on:
-      - db-shared
+      db-shared:
+        condition: service_healthy
 
   administration-utility-service:
     build:
@@ -44,7 +51,8 @@ services:
     networks:
       - gpdi-network
     depends_on:
-      - db-shared
+      db-shared:
+        condition: service_healthy
 
   content-publication-service:
     build:
@@ -61,7 +69,8 @@ services:
     networks:
       - gpdi-network
     depends_on:
-      - db-shared
+      db-shared:
+        condition: service_healthy
 
   event-rayon-service:
     build:
@@ -78,7 +87,8 @@ services:
     networks:
       - gpdi-network
     depends_on:
-      - db-shared
+      db-shared:
+        condition: service_healthy
 
   user-account-service:
     build:
@@ -95,7 +105,8 @@ services:
     networks:
       - gpdi-network
     depends_on:
-      - db-shared
+      db-shared:
+        condition: service_healthy
 
 networks:
   gpdi-network:

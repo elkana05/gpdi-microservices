@@ -17,7 +17,12 @@ return [
 
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    'allowed_origins' => [
+        'http://localhost:5173',          // development lokal
+        'http://127.0.0.1:5173',          // development lokal (alt)
+        'https://gpdi.example.com',       // TODO: ganti dengan domain VPS Anda setelah aktif
+        'https://www.gpdi.example.com',   // TODO: ganti dengan domain VPS Anda (www)
+    ],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],

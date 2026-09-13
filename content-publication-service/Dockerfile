@@ -27,5 +27,8 @@ WORKDIR /var/www
 # Copy existing application directory contents
 COPY . /var/www
 
-EXPOSE 9000
-CMD ["php-fpm"]
+# Install Composer dependencies (tanpa dev package, optimized autoloader)
+RUN composer install --optimize-autoloader --no-dev
+
+EXPOSE 8002
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8002", "--no-reload"]
